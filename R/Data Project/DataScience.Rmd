@@ -1,0 +1,96 @@
+---
+title: "Data Science Project"
+author: "Monica Chan"
+date: "4/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Background
+
+I decided to investigate NYC's education data, specifically the graduation rates in the five boroguhs of NYC: Manhattan, Queens, Brooklyn, The Bronx, and Staten Island. The original data set had data for these five boroughs from the years 2001-2006. There were a lot of other variables the set investigated, but I decided to focus on graduation rates in thise regions. This first chunk of code just sections off the data into the sets that I wanted to investigate, the individual graduation rates for each borough. The first table is the raw data I worked with, and the second table is the average graduation rate for each borough. I thought this was not the best measurement for better school systems, I thought instead that maybe investigating which borough's graduation rate improved the most on average would be a better measure for this. 
+
+```{r echo = FALSE}
+library(readr)
+library(ggplot2)
+BoroughEducation <- read.csv("BoroughEducation.csv")
+class(BoroughEducation)
+row1 = 1
+row35 = 35
+dataSet = BoroughEducation[row1:row35, 1:6]
+class(dataSet)
+
+#Data for individual boroughs
+brooklyn <- dataSet[1:7,3:6]
+bronx <- dataSet[8:14,3:6]
+manhattan <- dataSet[15:21, 3:6]
+queens <- dataSet[22:28,3:6]
+statenIsland <- dataSet[29:35,3:6]
+
+brookNumeric <- as.numeric(brooklyn[,4])
+bronxNumeric <- as.numeric(bronx[,4])
+manhattanNumeric <- as.numeric(manhattan[,4])
+queensNumeric <- as.numeric(queens[,4])
+statenNumeric <- as.numeric(statenIsland[,4]) 
+
+print(dataSet)
+avgGraduationRate <- c(mean(brookNumeric), mean(bronxNumeric), mean(manhattanNumeric), mean(queensNumeric), mean(statenNumeric))
+names <- c("Brooklyn", "Bronx", "Manhattan", "Queens", "Staten Island")
+
+averageGraduationRateNYC <-data.frame(names, avgGraduationRate)
+
+print(averageGraduationRateNYC)
+```
+
+## Calculations
+I wrote the function growthGrad to find the mean change in graduation rate from year to year. Essentially I just subtract year n from year n1... etc. and add that to a list. I then return the mean of that list. One thing I learned from this experience through some frsutrating debugging was that there are different types of vectors, and I needed to use a numeric vector instead of a list! 
+
+
+```{r}
+growthGrad <- function(x){
+  previousYear <- x[1]
+  years <- x
+  z <- numeric()
+  for(i in x[2:7]){
+    y <- i - previousYear
+    z <- c(z, y)
+    previousYear = i
+  }
+  averageGrowth = mean(z)
+  return(averageGrowth)
+}
+```
+
+## Plots
+
+It can be seen from this graph that the borough with the highest average graduation rate growth is Brooklyn! 
+
+```{r echo = FALSE}
+brooklynGrad = brooklyn[,4]
+bronxGrad = bronx[,4]
+manhattanGrad = manhattan[,4]
+queensGrad = queens[,4]
+statenIslandGrad = statenIsland[,4]
+
+#data for individual questions
+manhattanG <- growthGrad(manhattanGrad)
+queensG <- growthGrad(queensGrad)
+bronxG <- growthGrad(bronxGrad)
+brooklynG <- growthGrad(brooklynGrad)
+statenG<- growthGrad(statenIslandGrad)
+
+gradGrowth <- c(manhattanG, queensG, bronxG, brooklynG, statenG)
+boroughNames <- c("Manhattan", "Queens", "Bronx", "Brooklyn", "Staten Island")
+gradData <- data.frame(boroughNames, gradGrowth)
+```
+
+```{r echo = FALSE}
+g = ggplot(gradData, aes(x = boroughNames, y = gradGrowth)) + geom_bar(stat = "identity", fill="#6eadc4", colour="black")
+g
+```
+
+
+

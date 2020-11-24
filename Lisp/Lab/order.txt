@@ -1,0 +1,10 @@
+Blueberries 1.00
+y
+Strawberries 1.00
+y
+Syrup 0.50
+n
+Caramel 0.25
+n
+Chocolate 1.50
+n
